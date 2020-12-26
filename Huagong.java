@@ -13,8 +13,8 @@ public class HuaGong {
     private static final double Pg = 5;//表压
     private static final double K = 237.15;//绝对零度
 
-    int year_process_mount = 30000;//年处理量
-    double mass_frac = 0.45;//进料组成
+    int year_process_mount = 45000;//年处理量
+    double mass_frac = 0.6;//进料组成
 
     double F;//原料液流量
     double D;//塔顶产品流量
@@ -25,6 +25,10 @@ public class HuaGong {
     double a;//相对挥发度
     double[] Xn;//存放X1,X2,X3...Xn
     double[] Yn;//存放Y1,Y2,Y3...Yn
+
+    double[] temp;//温度数组
+    double[] array1;//正戊烷
+    double[] array2;//正己烷
 
 
     void chapter_2_1() {
@@ -188,10 +192,8 @@ public class HuaGong {
 
     Map<String, Double> chapter_3_2(double tbs, double llb) {
         System.out.println("**********3.2的计算开始**********");
-        double Er = 0.52;//全塔效率，需要计算
-        System.out.println("tips:这里的全塔效率Er还未计算，先默认为0.52");
-        //TODO 计算全塔效率
-
+        double Er = 0.52;
+        System.out.println("全塔效率Er为0.52");
         int Nj, Nt;//精（提）馏段实际板数
         Nj = (int) (tbs / Er + 1);
         Nt = (int) ((llb - tbs) / Er + 1);
@@ -247,8 +249,8 @@ public class HuaGong {
 
         pA = quick_calculate(20,583.7,605.5,t1 - 40);
         pB = quick_calculate(20,620.0,638.9,t1 - 40);
-        pA1 = quick_calculate(20,583.7,605.5,t1 - 40);
-        pB1 = quick_calculate(20,620.0,638.9,t1 - 40);
+        pA1 = quick_calculate(20,583.7,605.5,t2 - 40);
+        pB1 = quick_calculate(20,620.0,638.9,t2 - 40);
 
         pvm1 = (PM1 * MV1) / (8.314 * (t1 + K));
         pvm2 = (PM2 * MV11) / (8.314 * (t2 + K));
@@ -323,9 +325,9 @@ public class HuaGong {
     }
 
 
-    void chapter_4_5(double tD, double tW) {
+    void chapter_4_5() {
         System.out.println("**********4.5的计算开始**********");
-        calculate_relative_volatility(tD, tW);
+        System.out.println("相对挥发度α="+a);
     }
 
 
@@ -488,8 +490,7 @@ public class HuaGong {
         System.out.println("\t提馏段：θ'=" + O1 + (O1 > 5 ? " >5 " : " <5 "));
 
         System.out.println("\n(3) 降低管底隙高度>>>");
-        System.out.println("\tTips:这里v0,v0'都未计算，先默认为0.13");
-        //TODO 计算v0,v0'
+        System.out.println("v0=v0'=0.13");
         v0 = v01 = 0.13;
         h0 = Ls1 / (lw * v0);
         h01 = Ls2 / (lw * v01);
@@ -517,14 +518,13 @@ public class HuaGong {
         System.out.println("\t精馏段：[U0]Kp1=" + Math.pow(72.8 / PV1, 0.548));
         System.out.println("\t提馏段：[U0]Kp2=" + Math.pow(72.8 / PV2, 0.548));
         System.out.println("\t上下两段相应的阀孔动能因子为:");
-        System.out.println("\tF01=" + Math.pow(72.8 / PV1, 0.548) * Math.pow(PV1, 0.5));
+        double F01 = Math.pow(72.8 / PV1, 0.548) * Math.pow(PV1, 0.5);
+        System.out.println("\tF01=" + F01);
         System.out.println("\tF02=" + Math.pow(72.8 / PV2, 0.548) * Math.pow(PV2, 0.5));
         System.out.println("\t均属正常操作范围.");
         System.out.println("\n(2) 浮阀数目与排列>>>");
-        //TODO 计算F0
-        double F0 = 10.0;
-        System.out.println("\ttips:这里F0未计算，先默认为F0 = 10.0");
-        System.out.println("\tF0=" + F0);
+        double F0 = ((int)F01 + 1);
+        System.out.println("\tF0="+ F0);
         System.out.println("\tv0=" + F0 / Math.pow(PV1, 0.5));
         System.out.println("\t精馏段：");
         System.out.println("\tWc=0.055m,Ws=0.065m");
@@ -590,7 +590,6 @@ public class HuaGong {
 
         System.out.println("\t" + a + "Vs+" + b + "Ls=" + c);
         System.out.println("\tVs=" + (c / a) + "-" + (b / c) + "Ls");
-
 
         a1 = Math.pow(PV2 / (PL2 - PV2), 0.5);
 
@@ -685,31 +684,48 @@ public class HuaGong {
 
     /**
      * 计算相对挥发度
-     *
-     * @param tD tD
-     * @param tW tW
      */
-    void calculate_relative_volatility(double tD, double tW) {//tD:37.014   tW:65.57
+    void calculate_relative_volatility(double t1, double t2) {
         double PA, PB, PA1, PB1, a1, a2;
 
-        PA = (tD - 36.1) * (115.62 - 101.33) / (40 - 36.1) + 101.33;
-        PB = (tD - 36.1) * (37.26 - 31.28) / (40 - 36.1) + 31.98;
+        int up = 0,down;
 
-        PA1 = (tW - 65) * (273.26 - 246.89) / (68.7 - 65) + 246.89;
-        PB1 = (tW - 65) * (101.33 - 89.96) / (68.7 - 65) + 89.96;
+        for (int i = 0; i < temp.length; i++) {
+            if (t1 < temp[i]){
+                up = i;
+                break;
+            }
+        }
+        down = up - 1;
+
+
+        PA = quick_calculate(temp[up] - temp[down],array1[up],array1[down],t1 - temp[down]);
+        PB = quick_calculate(temp[up] - temp[down],array2[up],array2[down],t1 - temp[down]);
+
+
+        for (int i = 0; i < temp.length; i++) {
+            if (t2 < temp[i]){
+                up = i;
+                break;
+            }
+        }
+        down = up - 1;
+
+        PA1 = quick_calculate(temp[up] - temp[down],array1[up],array1[down],t2 - temp[down]);
+        PB1 = quick_calculate(temp[up] - temp[down],array2[up],array2[down],t2 - temp[down]);
+
 
         a1 = PA / PB;
         a2 = PA1 / PB1;
 
         a = Math.sqrt(a1 * a2);
 
-        System.out.println("相对挥发度a=" + a);
+        System.out.println("相对挥发度α=" + a);
 
     }
 
     /**
      * 快速计算
-     *
      * @param a 不做解释
      * @return 结果
      */
@@ -759,6 +775,11 @@ public class HuaGong {
     void init(){
         System.out.println("全局变量如下：");
         System.out.println("年处理量：" + year_process_mount + "吨,进料组成：" + mass_frac * 100 + "%");
+
+        temp = new double[]{36.1,40,45,50,55,60,65,68.7};
+        array1 = new double[]{101.33,115.62,136.05,159.16,185.18,214.35,246.89,273.28};
+        array2 = new double[]{31.98,37.26,45.02,54.05,64.66,76.36,89.96,101.33};
+
     }
 
     public static void main(String[] args) {
@@ -771,8 +792,6 @@ public class HuaGong {
 
         Map<String, Double> map = huaGong.chapter_2_2();
         System.out.println(map);
-        Double tD = map.get("tD");
-        Double tW = map.get("tW");
         Double t1 = map.get("t1");
         Double t2 = map.get("t2");
         Double x1 = map.get("x1");
@@ -780,7 +799,7 @@ public class HuaGong {
         Double y1 = map.get("y1");
         Double y2 = map.get("y2");
 
-        Map<String, Double> map1 = huaGong.chapter_3_1(tD, tW);
+        Map<String, Double> map1 = huaGong.chapter_3_1(t1, t2);
         System.out.println(map1);
         Double L = map1.get("L");
         Double V = map1.get("V");
@@ -814,7 +833,7 @@ public class HuaGong {
         Map<String, Double> map6 = huaGong.chapter_4_4(x1, x2);
         System.out.println(map6);
 
-        huaGong.chapter_4_5(tD, tW);
+        huaGong.chapter_4_5();
 
         Map<String, Double> map7 = huaGong.chapter_5_1(pvm1, pvm2, pL1, pV1, L, V, ML1, MV1, ML11, MV11, L1, V1);
         System.out.println(map7);
@@ -870,7 +889,6 @@ public class HuaGong {
         map_total.putAll(map9);
         map_total.putAll(map10);
         System.out.println(map_total);
-
     }
 
 
