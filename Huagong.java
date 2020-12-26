@@ -13,7 +13,7 @@ public class HuaGong {
     private static final double Pg = 5;//表压
     private static final double K = 237.15;//绝对零度
 
-    int year_process_mount = 45000;//年处理量
+    int year_process_mount = 30000;//年处理量
     double mass_frac = 0.6;//进料组成
 
     double F;//原料液流量
@@ -27,8 +27,8 @@ public class HuaGong {
     double[] Yn;//存放Y1,Y2,Y3...Yn
 
     double[] temp;//温度数组
-    double[] array1;//正戊烷
-    double[] array2;//正己烷
+    double[] array1;//正戊烷数组
+    double[] array2;//正己烷数组
 
 
     void chapter_2_1() {
@@ -53,11 +53,16 @@ public class HuaGong {
         double tF, tD, tW, t1, t2, x1, y1, x2, y2;
 
         tF = 45 + (Xf - 0.62) * (50 - 45) / (0.45 - 0.62);
+        System.out.println("tF = 45 + (Xf - 0.62) * (50 - 45) / (0.45 - 0.62)");
         tD = 40 + (Xd - 0.82) * (40 - 36.1) / (0.82 - 1);
+        System.out.println("tD = 40 + (Xd - 0.82) * (40 - 36.1) / (0.82 - 1)");
         tW = 68.7 + (Xw - 0) * (68.7 - 65) / (0 - 0.07);
+        System.out.println("tW = 68.7 + (Xw - 0) * (68.7 - 65) / (0 - 0.07)");
 
         t1 = (tF + tD) / 2;
+        System.out.println("t1 = (tF + tD) / 2");
         t2 = (tF + tW) / 2;
+        System.out.println("t2 = (tF + tW) / 2");
 
         x1 = quick_calculate(5, 0.62, 0.82, t1 - 40);
         y1 = quick_calculate(5,0.83,0.93,t1 - 40);
@@ -198,8 +203,8 @@ public class HuaGong {
         Nj = (int) (tbs / Er + 1);
         Nt = (int) ((llb - tbs) / Er + 1);
         HashMap<String, Double> map = new HashMap<>();
-        map.put("Nj", (double) Nj);
-        map.put("Nt", (double) Nt);
+        map.put("N精", (double) Nj);
+        map.put("N提", (double) Nt);
         return map;
 
     }
@@ -216,6 +221,13 @@ public class HuaGong {
         PM1 = (PD + PF) / 2;
         PW1 = PF + Nt * AP;
         PM2 = (PF + PW1) / 2;
+
+        System.out.println("PD = P0 + Pg;\n" +
+                "        AP = 0.7;\n" +
+                "        PF = PD + Nj * AP;\n" +
+                "        PM1 = (PD + PF) / 2;\n" +
+                "        PW1 = PF + Nt * AP;\n" +
+                "        PM2 = (PF + PW1) / 2;");
 
 
         HashMap<String, Double> map = new HashMap<>();
@@ -247,6 +259,11 @@ public class HuaGong {
         ML11 = zww * x2 + zjw * (1 - y2);
         MV11 = zww * y2 + zjw * (1 - x2);
 
+        System.out.println("ML1 = zww * x1 + zjw * (1 - y1);\n" +
+                "        MV1 = zww * y1 + zjw * (1 - x1);\n" +
+                "        ML11 = zww * x2 + zjw * (1 - y2);\n" +
+                "        MV11 = zww * y2 + zjw * (1 - x2);");
+
         pA = quick_calculate(20,583.7,605.5,t1 - 40);
         pB = quick_calculate(20,620.0,638.9,t1 - 40);
         pA1 = quick_calculate(20,583.7,605.5,t2 - 40);
@@ -255,11 +272,19 @@ public class HuaGong {
         pvm1 = (PM1 * MV1) / (8.314 * (t1 + K));
         pvm2 = (PM2 * MV11) / (8.314 * (t2 + K));
 
+        System.out.println("pvm1 = (PM1 * MV1) / (8.314 * (t1 + K));\n" +
+                "        pvm2 = (PM2 * MV11) / (8.314 * (t2 + K));");
+
 
         double tmp1 = (x1 * zww) / (x1 * zww + (1 - x1) * zjw);
         double tmp2 = (x2 * zww) / (x2 * zww + (1 - x2) * zjw);
         pL1 = 1 / (tmp1 / pA + (1 - tmp1) / pB);
         pV1 = 1 / (tmp2 / pA1 + (1 - tmp2) / pB1);
+
+        System.out.println("double tmp1 = (x1 * zww) / (x1 * zww + (1 - x1) * zjw);\n" +
+                "        double tmp2 = (x2 * zww) / (x2 * zww + (1 - x2) * zjw);\n" +
+                "        pL1 = 1 / (tmp1 / pA + (1 - tmp1) / pB);\n" +
+                "        pV1 = 1 / (tmp2 / pA1 + (1 - tmp2) / pB1);");
 
         HashMap<String, Double> map = new HashMap<>();
         map.put("ML1", ML1);
@@ -286,9 +311,13 @@ public class HuaGong {
         qb = quick_calculate(20, 13.23, 15.99, t1 - 40);
         qm = (qa * qb) / (qa * (1 - x1) + qb * x1);
 
+        System.out.println("\tqm = (qa * qb) / (qa * (1 - x1) + qb * x1);");
+
         qa1 = quick_calculate(20, 11.76, 13.85, t2 - 40);
         qb1 = quick_calculate(20, 13.23, 15.99, t2 - 40);
         qm1 = (qa1 * qb1) / (qa1 * (1 - x2) + qb1 * x2);
+
+        System.out.println("\tqm1 = (qa1 * qb1) / (qa1 * (1 - x2) + qb1 * x2);\n");
 
         HashMap<String, Double> map = new HashMap<>();
         map.put("qa", qa);
@@ -311,6 +340,9 @@ public class HuaGong {
         Ub1 = quick_calculate(25, 7.66, 7.10, 6.3);
         U1 = x1 * Ua + Ub * (1 - x1);
         U2 = x2 * Ub1 + Ua1 * (1 - x2);
+
+        System.out.println("U1 = x1 * Ua + Ub * (1 - x1);\n" +
+                "        U2 = x2 * Ub1 + Ua1 * (1 - x2);");
 
         HashMap<String, Double> map = new HashMap<>();
         map.put("Ua", Ua);
@@ -353,6 +385,18 @@ public class HuaGong {
         Ls2 = L2 / PL2;
         Vs2 = V2 / PV2;
 
+
+        System.out.println("L1 = ML1 * L / 3600;\n" +
+                "        V1 = MV1 * V / 3600;\n" +
+                "        Ls1 = L1 / PL1;\n" +
+                "        Vs1 = V1 / PV1;\n" +
+                "\n" +
+                "        L2 = ML11 * l1 / 3600;\n" +
+                "        V2 = MV11 * v1 / 3600;\n" +
+                "\n" +
+                "        Ls2 = L2 / PL2;\n" +
+                "        Vs2 = V2 / PV2;");
+
         HashMap<String, Double> map = new HashMap<>();
         map.put("PV1", PV1);
         map.put("PV2", PV2);
@@ -372,81 +416,88 @@ public class HuaGong {
     Map<String, Double> chapter_5_2(double Ls1, double Ls2, double Vs1, double Vs2, double PV1, double PV2, double PL1, double PL2, double qm, double qm1) {
         System.out.println("**********5.2的计算开始**********");
 
-        System.out.println("精馏段>>>\n");
 
         //横坐标数值
         double hzbsz_1 = Ls1 / Vs1 * Math.pow((PL1 / PV1), 0.5);
-        System.out.println("\t横坐标值为：" + hzbsz_1);
-
         double HT = 450;
         double hL = 60;
         //板间距
         double bjj = (HT - hL) / 1000;
-        System.out.println("\tHT - hL = " + bjj);
-
         double C20_1 = 0.08;
-        System.out.println("\t查表知C20=" + C20_1);
-
         double C = C20_1 * Math.pow((qm / 20), 0.2);
-        System.out.println("\tC=" + C);
-
         double Vmax = C * Math.pow((PL1 - PV1) / PV1, 0.5);
-        System.out.println("\tVmax=" + Vmax);
-
         //安全系数取0.8
         double aqxs = 0.8;
-        System.out.println("\t安全系数取" + aqxs);
-
         double v1 = aqxs * Vmax;
-        System.out.println("\tv1=" + v1);
-
         double D1 = Math.pow((4 * Vs1) / (3.14 * v1), 0.5);
-        System.out.println("\tD1=" + D1);
-
         int tmp_1 = (int) (D1 * 10 + 1);
         double D1_after_1 = tmp_1 / 10.0;
-        System.out.println("\tD1取整，D1=" + D1_after_1);
-
         double AT = 3.14 / 4 * D1 * D1;
-        System.out.println("\tAT=" + AT);
-
         double v11 = Vs1 / AT;
-        System.out.println("\tv1‘=" + v11);
-
-        System.out.println("\n提馏段>>>\n");
-
         double hzbsz_2 = Ls2 / Vs2 * Math.pow((PL2 / PV2), 0.5);
-        System.out.println("\t横坐标值为：" + hzbsz_2);
-
-        //HT,hL,bjj与前面一样
-        System.out.println("\tHT - hL = " + bjj);
-
         double C20_2 = 0.08;
-        System.out.println("\t查表知C20=" + C20_2);
-
         double C1 = C20_2 * Math.pow((qm1 / 20), 0.5);
-        System.out.println("\tC'=" + C1);
-
         double Vmax1 = C1 * Math.pow((PL2 - PV2) / PV2, 0.5);
-        System.out.println("\tVmax'=" + Vmax);
-
-        //aqxs不变
-        System.out.println("\t安全系数取" + aqxs);
-
         double v2 = aqxs * Vmax1;
-        System.out.println("\tv2=" + v2);
-
         double D2 = Math.pow((4 * Vs2) / (3.14 * v2), 0.5);
-        System.out.println("\tD2=" + D2);
-
         int tmp_2 = (int) (D2 * 10 + 1);
         double D1_after_2 = tmp_2 / 10.0;
-        System.out.println("\tD2取整，D2=" + D1_after_2);
-
         double AT1 = 3.14 / 4 * D2 * D2;
-        System.out.println("\tAT'=" + AT1);
-
         double v21 = Vs2 / AT1;
+
+        System.out.println("//横坐标数值\n" +
+                "        double hzbsz_1 = Ls1 / Vs1 * Math.pow((PL1 / PV1), 0.5);\n" +
+                "        double HT = 450;\n" +
+                "        double hL = 60;\n" +
+                "        //板间距\n" +
+                "        double bjj = (HT - hL) / 1000;\n" +
+                "        double C20_1 = 0.08;\n" +
+                "        double C = C20_1 * Math.pow((qm / 20), 0.2);\n" +
+                "        double Vmax = C * Math.pow((PL1 - PV1) / PV1, 0.5);\n" +
+                "        //安全系数取0.8\n" +
+                "        double aqxs = 0.8;\n" +
+                "        double v1 = aqxs * Vmax;\n" +
+                "        double D1 = Math.pow((4 * Vs1) / (3.14 * v1), 0.5);\n" +
+                "        int tmp_1 = (int) (D1 * 10 + 1);\n" +
+                "        double D1_after_1 = tmp_1 / 10.0;\n" +
+                "        double AT = 3.14 / 4 * D1 * D1;\n" +
+                "        double v11 = Vs1 / AT;\n" +
+                "        double hzbsz_2 = Ls2 / Vs2 * Math.pow((PL2 / PV2), 0.5);\n" +
+                "        double C20_2 = 0.08;\n" +
+                "        double C1 = C20_2 * Math.pow((qm1 / 20), 0.5);\n" +
+                "        double Vmax1 = C1 * Math.pow((PL2 - PV2) / PV2, 0.5);\n" +
+                "        double v2 = aqxs * Vmax1;\n" +
+                "        double D2 = Math.pow((4 * Vs2) / (3.14 * v2), 0.5);\n" +
+                "        int tmp_2 = (int) (D2 * 10 + 1);\n" +
+                "        double D1_after_2 = tmp_2 / 10.0;\n" +
+                "        double AT1 = 3.14 / 4 * D2 * D2;\n" +
+                "        double v21 = Vs2 / AT1;");
+
+        System.out.println("精馏段>>>\n");
+        System.out.println("\t横坐标值为：" + hzbsz_1);
+        System.out.println("\tHT - hL = " + bjj);
+        System.out.println("\t查表知C20=" + C20_1);
+        System.out.println("\tC=" + C);
+        System.out.println("\tVmax=" + Vmax);
+        System.out.println("\t安全系数取" + aqxs);
+        System.out.println("\tv1=" + v1);
+        System.out.println("\tD1=" + D1);
+        System.out.println("\tD1取整，D1=" + D1_after_1);
+        System.out.println("\tAT=" + AT);
+        System.out.println("\tv1‘=" + v11);
+        System.out.println("\n提馏段>>>\n");
+        System.out.println("\t横坐标值为：" + hzbsz_2);
+        //HT,hL,bjj与前面一样
+        System.out.println("\tHT - hL = " + bjj);
+        System.out.println("\t查表知C20=" + C20_2);
+        System.out.println("\tC'=" + C1);
+        System.out.println("\tVmax'=" + Vmax);
+        //aqxs不变
+        System.out.println("\t安全系数取" + aqxs);
+        System.out.println("\tv2=" + v2);
+        System.out.println("\tD2=" + D2);
+        System.out.println("\tD2取整，D2=" + D1_after_2);
+        System.out.println("\tAT'=" + AT1);
         System.out.println("\tv2'=" + v21);
 
 
@@ -464,36 +515,49 @@ public class HuaGong {
 
         double lw, how, lA, hw, how1, hw1, Af, Wd, O, O1, v0, v01, h0, h01;
 
-        System.out.println("(1) 堰长lw>>>");
         lw = 0.65 * D;
-        System.out.println("\t取lw=" + lw);
         lA = Ls1;
-        System.out.println("\t精馏段：");
         how = 2.84 / 1000 * Math.pow(lA * 3600 / lw, 2.0 / 3.0);
         hw = hL - how;
-        System.out.println("\thow=" + how);
-        System.out.println("\thw=" + hw);
-        System.out.println("\t提馏段：");
         how1 = 2.84 / 1000 * Math.pow(Ls2 * 3600 / lw, 2.0 / 3.0);
         hw1 = hL - how1;
-        System.out.println("\thow'=" + how1);
-        System.out.println("\thw'=" + hw1);
-
-        System.out.println("\n(2) 弓型降液管的宽度和横截面积>>>");
-        System.out.println("\t查图得：Af / AT = 0.07\t Wd / D = 0.145");
         Af = 0.07 * AT;
         Wd = 0.145 * D;
-        System.out.println("\t则：Af=" + Af + "\tWd=" + Wd);
         O = Af * HT / Ls1;
-        System.out.println("\t精馏段：θ=" + O + (O > 5 ? " >5 " : " <5 "));
         O1 = Af * HT / Ls2;
-        System.out.println("\t提馏段：θ'=" + O1 + (O1 > 5 ? " >5 " : " <5 "));
-
-        System.out.println("\n(3) 降低管底隙高度>>>");
-        System.out.println("v0=v0'=0.13");
         v0 = v01 = 0.13;
         h0 = Ls1 / (lw * v0);
         h01 = Ls2 / (lw * v01);
+
+        System.out.println("lw = 0.65 * D;\n" +
+                "        lA = Ls1;\n" +
+                "        how = 2.84 / 1000 * Math.pow(lA * 3600 / lw, 2.0 / 3.0);\n" +
+                "        hw = hL - how;\n" +
+                "        how1 = 2.84 / 1000 * Math.pow(Ls2 * 3600 / lw, 2.0 / 3.0);\n" +
+                "        hw1 = hL - how1;\n" +
+                "        Af = 0.07 * AT;\n" +
+                "        Wd = 0.145 * D;\n" +
+                "        O = Af * HT / Ls1;\n" +
+                "        O1 = Af * HT / Ls2;\n" +
+                "        v0 = v01 = 0.13;\n" +
+                "        h0 = Ls1 / (lw * v0);\n" +
+                "        h01 = Ls2 / (lw * v01);");
+
+        System.out.println("(1) 堰长lw>>>");
+        System.out.println("\t取lw=" + lw);
+        System.out.println("\t精馏段：");
+        System.out.println("\thow=" + how);
+        System.out.println("\thw=" + hw);
+        System.out.println("\t提馏段：");
+        System.out.println("\thow'=" + how1);
+        System.out.println("\thw'=" + hw1);
+        System.out.println("\n(2) 弓型降液管的宽度和横截面积>>>");
+        System.out.println("\t查图得：Af / AT = 0.07\t Wd / D = 0.145");
+        System.out.println("\t则：Af=" + Af + "\tWd=" + Wd);
+        System.out.println("\t精馏段：θ=" + O + (O > 5 ? " >5 " : " <5 "));
+        System.out.println("\t提馏段：θ'=" + O1 + (O1 > 5 ? " >5 " : " <5 "));
+        System.out.println("\n(3) 降低管底隙高度>>>");
+        System.out.println("v0=v0'=0.13");
         System.out.println("\t精馏段：v0=" + v0 + "，h0=" + h0);
         System.out.println("\t提馏段：v0'=" + v01 + "，h0'=" + h01 + " (m) = " + h01 * 1000 + " (mm)");
         System.out.println("\t因为h0'不小20mm,故h0满足要求");
@@ -513,48 +577,66 @@ public class HuaGong {
     Map<String, Double> chapter_5_4(double PV1, double PV2, double D, double Wd, double Vs1, double Vs2) {
 
 
-        System.out.println("**********5.4的计算开始**********");
-        System.out.println("(1) 塔板分布>>>");
-        System.out.println("\t精馏段：[U0]Kp1=" + Math.pow(72.8 / PV1, 0.548));
-        System.out.println("\t提馏段：[U0]Kp2=" + Math.pow(72.8 / PV2, 0.548));
-        System.out.println("\t上下两段相应的阀孔动能因子为:");
         double F01 = Math.pow(72.8 / PV1, 0.548) * Math.pow(PV1, 0.5);
-        System.out.println("\tF01=" + F01);
-        System.out.println("\tF02=" + Math.pow(72.8 / PV2, 0.548) * Math.pow(PV2, 0.5));
-        System.out.println("\t均属正常操作范围.");
-        System.out.println("\n(2) 浮阀数目与排列>>>");
         double F0 = ((int)F01 + 1);
-        System.out.println("\tF0="+ F0);
-        System.out.println("\tv0=" + F0 / Math.pow(PV1, 0.5));
-        System.out.println("\t精馏段：");
-        System.out.println("\tWc=0.055m,Ws=0.065m");
         double R = D / 2 - 0.055;
-        System.out.println("\tR=" + R);
         double x = D / 2 - Wd - 0.065;
-        System.out.println("\tx=" + x);
         double Aa = 2 * (x * Math.pow(R * R - x * x, 0.5) + 3.14 * R * R / 180 * Math.toDegrees(Math.sin(x / R)));
-        System.out.println("\tAa=" + Aa);
-        System.out.println("\t提馏段：");
-        System.out.println("\tWc=0.030m,Ws=0.055m");
         double R1 = D / 2 - 0.030;
-        System.out.println("\tR=" + R1);
         double x1 = D / 2 - Wd - 0.055;
-        System.out.println("\tx=" + x1);
         double Aa1 = 2 * (x1 * Math.pow(R1 * R1 - x1 * x1, 0.5) + (3.14 * R1 * R1 / 180 * Math.toDegrees(Math.asin(x1 / R1))));
-        System.out.println("\tAa=" + Aa1);
-        System.out.println("\n(3) 浮阀数n与开孔率>>>");
-
-        double n_after = extracted_5_4("精馏段", F0, PV1, Vs1)[0];
-        double n1_after = extracted_5_4("提馏段", F0, PV2, Vs2)[0];
-
-        double n = extracted_5_4("精馏段", F0, PV1, Vs1)[1];
-        double n1 = extracted_5_4("提馏段", F0, PV2, Vs2)[1];
-
-
+        double[] t1 = extracted_5_4("精馏段", F0, PV1, Vs1);
+        double[] t2 = extracted_5_4("提馏段", F0, PV2, Vs2);
+        double n_after = t1[0];
+        double n1_after = t2[0];
+        double n = t1[1];
+        double n1 = t2[1];
         double t = 0.075;
         double ta = Aa / (n * t);
         double tb = Aa1 / (n1 * t);
         double tc = (int) ((Math.min(ta, tb)) * 100) / 100.0;
+
+
+        System.out.println("**********5.4的计算开始**********");
+        System.out.println("double F01 = Math.pow(72.8 / PV1, 0.548) * Math.pow(PV1, 0.5);\n" +
+                "        double F0 = ((int)F01 + 1);\n" +
+                "        double R = D / 2 - 0.055;\n" +
+                "        double x = D / 2 - Wd - 0.065;\n" +
+                "        double Aa = 2 * (x * Math.pow(R * R - x * x, 0.5) + 3.14 * R * R / 180 * Math.toDegrees(Math.sin(x / R)));\n" +
+                "        double R1 = D / 2 - 0.030;\n" +
+                "        double x1 = D / 2 - Wd - 0.055;\n" +
+                "        double Aa1 = 2 * (x1 * Math.pow(R1 * R1 - x1 * x1, 0.5) + (3.14 * R1 * R1 / 180 * Math.toDegrees(Math.asin(x1 / R1))));\n" +
+                "        double[] t1 = extracted_5_4(\"精馏段\", F0, PV1, Vs1);\n" +
+                "        double[] t2 = extracted_5_4(\"提馏段\", F0, PV2, Vs2);\n" +
+                "        double n_after = t1[0];\n" +
+                "        double n1_after = t2[0];\n" +
+                "        double n = t1[1];\n" +
+                "        double n1 = t2[1];\n" +
+                "        double t = 0.075;\n" +
+                "        double ta = Aa / (n * t);\n" +
+                "        double tb = Aa1 / (n1 * t);\n" +
+                "        double tc = (int) ((Math.min(ta, tb)) * 100) / 100.0;");
+        System.out.println("(1) 塔板分布>>>");
+        System.out.println("\t精馏段：[U0]Kp1=" + Math.pow(72.8 / PV1, 0.548));
+        System.out.println("\t提馏段：[U0]Kp2=" + Math.pow(72.8 / PV2, 0.548));
+        System.out.println("\t上下两段相应的阀孔动能因子为:");
+        System.out.println("\tF01=" + F01);
+        System.out.println("\tF02=" + Math.pow(72.8 / PV2, 0.548) * Math.pow(PV2, 0.5));
+        System.out.println("\t均属正常操作范围.");
+        System.out.println("\n(2) 浮阀数目与排列>>>");
+        System.out.println("\tF0="+ F0);
+        System.out.println("\tv0=" + F0 / Math.pow(PV1, 0.5));
+        System.out.println("\t精馏段：");
+        System.out.println("\tWc=0.055m,Ws=0.065m");
+        System.out.println("\tR=" + R);
+        System.out.println("\tx=" + x);
+        System.out.println("\tAa=" + Aa);
+        System.out.println("\t提馏段：");
+        System.out.println("\tWc=0.030m,Ws=0.055m");
+        System.out.println("\tR=" + R1);
+        System.out.println("\tx=" + x1);
+        System.out.println("\tAa=" + Aa1);
+        System.out.println("\n(3) 浮阀数n与开孔率>>>");
         System.out.println("\t取孔心距t=" + t);
         System.out.println("\t精馏段：t'=" + ta);
         System.out.println("\t提馏段：t'=" + tb);
@@ -577,22 +659,27 @@ public class HuaGong {
         double Ab;
         double a, b, c;
         double a1;
-        System.out.println("\t精馏段：");
         Zl = D - 2 * Wd;
-        System.out.println("\tZl=" + Zl);
-        System.out.println("\t查物系数：K=1.0,Cf=0.125");
         Ab = AT - 2 * Af;
-        System.out.println("\tAb=" + Ab);
-
         a = Math.pow(PV1 / (PL1 - PV1), 0.5);
         b = 1.36 * Zl;
         c = 0.8 * 0.125 * Ab;
-
-        System.out.println("\t" + a + "Vs+" + b + "Ls=" + c);
-        System.out.println("\tVs=" + (c / a) + "-" + (b / c) + "Ls");
-
         a1 = Math.pow(PV2 / (PL2 - PV2), 0.5);
 
+
+        System.out.println("Zl = D - 2 * Wd;\n" +
+                "        Ab = AT - 2 * Af;\n" +
+                "        a = Math.pow(PV1 / (PL1 - PV1), 0.5);\n" +
+                "        b = 1.36 * Zl;\n" +
+                "        c = 0.8 * 0.125 * Ab;\n" +
+                "        a1 = Math.pow(PV2 / (PL2 - PV2), 0.5);");
+
+        System.out.println("\t精馏段：");
+        System.out.println("\tZl=" + Zl);
+        System.out.println("\t查物系数：K=1.0,Cf=0.125");
+        System.out.println("\tAb=" + Ab);
+        System.out.println("\t" + a + "Vs+" + b + "Ls=" + c);
+        System.out.println("\tVs=" + (c / a) + "-" + (b / c) + "Ls");
         System.out.println("\t" + a1 + "Vs+" + b + "Ls=" + c);
         System.out.println("\tVs=" + (c / a1) + "-" + (b / c) + "Ls");
         System.out.println("精馏段\tLs(m3/s)\t0.002\t\t\t\t0.01");
@@ -622,8 +709,10 @@ public class HuaGong {
         System.out.println("**********6.5的计算开始**********");
         double Lsmin = (0.006 * 1000 / 2.84) / Math.pow(3600 / lw, 2 / 3.0);
         double last = Math.pow(Math.pow(Lsmin, 3), 0.5);
+        System.out.println("double Lsmin = (0.006 * 1000 / 2.84) / Math.pow(3600 / lw, 2 / 3.0);\n" +
+                "        double last = Math.pow(Math.pow(Lsmin, 3), 0.5);");
         System.out.println("(Ls)min=" + last);
-        System.out.println("**********所以计算均结束啦！！！**********");
+        System.out.println("**********所有计算均结束啦！！！**********");
     }
 
     private double[] extracted_5_4(String period,double F0,double PV,double Vs){
@@ -720,6 +809,10 @@ public class HuaGong {
 
         a = Math.sqrt(a1 * a2);
 
+        System.out.println("PA="+PA);
+        System.out.println("PB="+PB);
+        System.out.println("PA1="+PA1);
+        System.out.println("PB1="+PB1);
         System.out.println("相对挥发度α=" + a);
 
     }
@@ -809,7 +902,7 @@ public class HuaGong {
         Map<String, Double> map2 = huaGong.chapter_3_2(map1.get("tbs"), map1.get("llb"));
         System.out.println(map2);
 
-        Map<String, Double> map3 = huaGong.chapter_4_1(map2.get("Nj"), map2.get("Nt"));
+        Map<String, Double> map3 = huaGong.chapter_4_1(map2.get("N精"), map2.get("N提"));
         System.out.println(map3);
         Double PM1 = map3.get("PM1");
         Double PM2 = map3.get("PM2");
